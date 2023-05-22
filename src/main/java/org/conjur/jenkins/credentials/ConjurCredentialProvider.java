@@ -109,6 +109,7 @@ public class ConjurCredentialProvider extends CredentialsProvider {
     public ConjurCredentialStore getStore(ModelObject object) {
 
         GlobalConjurConfiguration globalConfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
+        LOGGER.log(Level.FINEST,"Global Conjur Configuration");
         if (globalConfig == null || !globalConfig.getEnableJWKS() || !globalConfig.getEnableContextAwareCredentialStore()) {
             LOGGER.log(Level.FINE, "No Conjur Credential Store (Content Aware)");
             return null;
@@ -124,10 +125,10 @@ public class ConjurCredentialProvider extends CredentialsProvider {
         if (object != null) {
             String key = String.valueOf(object.hashCode());            
             if (ConjurCredentialStore.getAllStores().containsKey(key)) {
-                // LOGGER.log(Level.FINEST, "GetStore EXISTING ConjurCredentialProvider : " + object.getClass().getName() + ": " + object.toString() + " => " + object.hashCode());
+                LOGGER.log(Level.FINEST, "GetStore EXISTING ConjurCredentialProvider : " + object.getClass().getName() + ": " + object.toString() + " => " + object.hashCode());
                 store = ConjurCredentialStore.getAllStores().get(key);
             } else {
-                // LOGGER.log(Level.FINEST, "GetStore NEW ConjurCredentialProvider : " + object.getClass().getName() + ": " + object.toString() + " => " + object.hashCode());
+                LOGGER.log(Level.FINEST, "GetStore NEW ConjurCredentialProvider : " + object.getClass().getName() + ": " + object.toString() + " => " + object.hashCode());
                 store = new ConjurCredentialStore(this, object);
                 supplier = memoizeWithExpiration(CredentialsSupplier.standard(object), Duration.ofSeconds(120));
                 ConjurCredentialStore.getAllStores().put(key, store);

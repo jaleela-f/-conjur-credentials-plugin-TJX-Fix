@@ -4,6 +4,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
@@ -13,12 +14,13 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.conjur.jenkins.configuration.ConjurConfiguration;
+import org.conjur.jenkins.conjursecrets.ConjurSecretCredentialsImpl;
+
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.CertificateCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-
-import org.conjur.jenkins.configuration.ConjurConfiguration;
 
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
@@ -26,25 +28,36 @@ import okhttp3.OkHttpClient;
 
 public class ConjurAPIUtils {
 	
+	private static final Logger LOGGER = Logger.getLogger(ConjurSecretCredentialsImpl.class.getName());
+	
 	static Logger getLogger() {
 		return Logger.getLogger(ConjurAPIUtils.class.getName());
 	}
 
+	@SuppressWarnings("deprecation")
 	static CertificateCredentials certificateFromConfiguration(ConjurConfiguration configuration) {
-
+		LOGGER.log(Level.FINE,"Calling certificateFromConfiguration>>>"+configuration);
 		CertificateCredentials certificate = null;
 
-		if (configuration.getCertificateCredentialID() == null ) { return null; }
+		
+		LOGGER.log(Level.FINE,"certificate is null"+configuration.getCertificateCredentialID());
+		if (configuration.getCertificateCredentialID() == null ) { 
+			LOGGER.log(Level.FINE,"certificate is null");
+			return null; 
+			
+		}
 		
 		certificate = CredentialsMatchers.firstOrNull(
 			CredentialsProvider.lookupCredentials(CertificateCredentials.class, Jenkins.get(), ACL.SYSTEM,
 					Collections.<DomainRequirement>emptyList()),
 			CredentialsMatchers.withId(configuration.getCertificateCredentialID()));
+		LOGGER.log(Level.FINE,"Calling certificateFromConfiguration>>>"+certificate);
 
 		return certificate;
 	}
 	
 	static OkHttpClient httpClientWithCertificate(CertificateCredentials certificate) {
+		LOGGER.log(Level.FINE,"Calling httpClientWithCertificate>>>"+certificate);
 		OkHttpClient client = null;
 
 		try {
@@ -79,6 +92,7 @@ public class ConjurAPIUtils {
 	}
 
 	public static OkHttpClient getHttpClient(ConjurConfiguration configuration) {
+		LOGGER.log(Level.FINE," ClientApiUtils getHttpClient>>>"+configuration);
 
 		CertificateCredentials certificate = certificateFromConfiguration(configuration);
 

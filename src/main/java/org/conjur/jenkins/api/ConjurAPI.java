@@ -9,17 +9,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.cloudbees.hudson.plugins.folder.AbstractFolder;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-
 import org.conjur.jenkins.configuration.ConjurConfiguration;
 import org.conjur.jenkins.configuration.ConjurJITJobProperty;
 import org.conjur.jenkins.configuration.FolderConjurConfiguration;
 import org.conjur.jenkins.configuration.GlobalConjurConfiguration;
 import org.conjur.jenkins.jwtauth.impl.JwtToken;
+
+import com.cloudbees.hudson.plugins.folder.AbstractFolder;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import hudson.model.AbstractItem;
 import hudson.model.Item;
@@ -52,6 +52,8 @@ public class ConjurAPI {
 	}
 
 	private static void defaultToEnvironment(ConjurAuthnInfo conjurAuthn) {
+		
+		
 		Map<String, String> env = System.getenv();
 		if (conjurAuthn.applianceUrl == null && env.containsKey("CONJUR_APPLIANCE_URL"))
 			conjurAuthn.applianceUrl = env.get("CONJUR_APPLIANCE_URL");
@@ -120,7 +122,7 @@ public class ConjurAPI {
 	}
 
 	public static ConjurAuthnInfo getConjurAuthnInfo(ConjurConfiguration configuration,
-			List<UsernamePasswordCredentials> availableCredentials, ModelObject context) {
+			List<UsernamePasswordCredentials> availableCredentials, ModelObject context)  {
 		ConjurAuthnInfo conjurAuthn = new ConjurAuthnInfo();
 
 		if (configuration != null) {
@@ -210,8 +212,11 @@ public class ConjurAPI {
 	}
 
 	public static ConjurConfiguration getConfigurationFromContext(ModelObject context, ModelObject storeContext) {
+		
+		LOGGER.log(Level.FINE,"Inside getConfigurationFromContext>>");
 
 		ModelObject effectiveContext = context != null? context : storeContext;
+		LOGGER.log(Level.FINE,"Context inside getConfigurationFromContext>>"+effectiveContext);
 
         Item contextObject = null;
 		ConjurJITJobProperty conjurJobConfig = null;
@@ -221,24 +226,30 @@ public class ConjurAPI {
             Run run = (Run) effectiveContext;
 			conjurJobConfig = (ConjurJITJobProperty) run.getParent().getProperty(ConjurJITJobProperty.class);
             contextObject = run.getParent();
+        	LOGGER.log(Level.FINE,"ContextObjet for instance Run>>"+contextObject);
         } else if (effectiveContext instanceof AbstractItem) {
 			contextObject = (Item) effectiveContext;
+			LOGGER.log(Level.FINE,"ContextObjet for Abstract Item>>"+contextObject);
 		}
 
 
 		ConjurConfiguration conjurConfig = GlobalConjurConfiguration.get().getConjurConfiguration();
-
+		LOGGER.log(Level.FINE,"Conjur Configuration"+conjurConfig);
 		if (effectiveContext == null) {
+			LOGGER.log(Level.FINE,"EffectiveContext is null");
 			return ConjurAPI.logConjurConfiguration(conjurConfig);
 		}
 
 		if (conjurJobConfig != null && !conjurJobConfig.getInheritFromParent()) {
 			// Taking the configuration from the Job
+			LOGGER.log(Level.FINE,"ConjurJobConfig is not null and not inherited from parent");
 			return ConjurAPI.logConjurConfiguration(conjurJobConfig.getConjurConfiguration());
 		}
 
 		ConjurConfiguration inheritedConfig = inheritedConjurConfiguration(contextObject);
+		LOGGER.log(Level.FINE," inherited from parent"+inheritedConfig);
 		if (inheritedConfig != null) {
+			LOGGER.log(Level.FINE," inherited from parent");
 			return ConjurAPI.logConjurConfiguration(inheritedConfig);
 		}
 
@@ -248,10 +259,12 @@ public class ConjurAPI {
 
 	@SuppressWarnings("unchecked")
 	private static ConjurConfiguration inheritedConjurConfiguration(Item job) {
+		LOGGER.log(Level.FINE," inside inheritedConjurConfiguration");
 		for (ItemGroup<? extends Item> g = job
 				.getParent(); g instanceof AbstractFolder; g = ((AbstractFolder<? extends Item>) g).getParent()) {
 			FolderConjurConfiguration fconf = ((AbstractFolder<?>) g).getProperties()
 					.get(FolderConjurConfiguration.class);
+			LOGGER.log(Level.FINE," inside inheritedConjurConfiguration"+fconf);
 			if (!(fconf == null || fconf.getInheritFromParent())) {
 				// take the folder Conjur Configuration
 				return fconf.getConjurConfiguration();

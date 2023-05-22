@@ -69,20 +69,25 @@ public class ConjurSecretCredentialsImpl extends BaseStandardCredentials impleme
 		return Secret.fromString(secretString);
 	}
 
-	public Secret getSecret() {
+	public Secret getSecret()  {
+		
+		LOGGER.log(Level.FINE," inside ConjurSecretCredentialImpl getSecret()>>");
 
 		String result = "";
 		try {
+			LOGGER.log(Level.FINE," Calling OKHttpClient )>>"+this.conjurConfiguration);
 			// Get Http Client
 			OkHttpClient client = ConjurAPIUtils.getHttpClient(this.conjurConfiguration);
+			LOGGER.log(Level.FINE," Calling OKHttpClient )>>"+client);
 			// Authenticate to Conjur
 			String authToken = ConjurAPI.getAuthorizationToken(client, this.conjurConfiguration, context);
 			// Retrieve secret from Conjur
 			String secretString = ConjurAPI.getSecret(client, this.conjurConfiguration, authToken, this.variablePath);
 			result = secretString;
+			
 		} catch (IOException e) {
 			LOGGER.log(Level.FINE, "EXCEPTION: " + e.getMessage());
-			throw new InvalidConjurSecretException(e.getMessage(), e);
+		//	throw new RuntimeException(e.getMessage(), e);
 		}
 
 		return secretFromString(result);
@@ -95,10 +100,11 @@ public class ConjurSecretCredentialsImpl extends BaseStandardCredentials impleme
 	public void setConjurConfiguration(ConjurConfiguration conjurConfiguration) {
 		if (conjurConfiguration != null)
 			this.conjurConfiguration = conjurConfiguration;
+		LOGGER.log(Level.FINE," inside setConjurConfiguration>>>"+conjurConfiguration);
 	}
 
 	public void setContext(ModelObject context) {
-		LOGGER.log(Level.FINEST, "Setting context");
+		LOGGER.log(Level.FINEST, "Setting context"+context);
 		this.context = context;
 		setConjurConfiguration(ConjurAPI.getConfigurationFromContext(context, storeContext));
 	}

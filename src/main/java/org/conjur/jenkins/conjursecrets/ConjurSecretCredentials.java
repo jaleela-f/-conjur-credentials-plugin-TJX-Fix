@@ -1,5 +1,6 @@
 package org.conjur.jenkins.conjursecrets;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public interface ConjurSecretCredentials extends StandardCredentials {
 
 	Secret getSecret();
 
-	default Secret secretWithConjurConfigAndContext(ConjurConfiguration conjurConfiguration, ModelObject context) {
+	default Secret secretWithConjurConfigAndContext(ConjurConfiguration conjurConfiguration, ModelObject context)  {
 		setConjurConfiguration(conjurConfiguration);
 		setContext(context);
 		return getSecret();
@@ -111,7 +112,7 @@ public interface ConjurSecretCredentials extends StandardCredentials {
 	static Secret getSecretFromCredentialIDWithConfigAndContext(String credentialID, 
 																ConjurConfiguration conjurConfiguration,
 																ModelObject context,
-																ModelObject storeContext) {
+																ModelObject storeContext)  {
 
 		ModelObject effectiveContext = context != null? context : storeContext;
 
@@ -119,6 +120,7 @@ public interface ConjurSecretCredentials extends StandardCredentials {
 		ConjurSecretCredentials credential = credentialWithID(credentialID, effectiveContext);
 		
 		return credential.secretWithConjurConfigAndContext(conjurConfiguration, effectiveContext);
+		
 	}
 
 }

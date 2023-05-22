@@ -10,13 +10,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
-
 import org.apache.commons.lang.StringUtils;
 import org.conjur.jenkins.credentials.ConjurCredentialProvider;
 import org.conjur.jenkins.credentials.ConjurCredentialStore;
@@ -27,6 +20,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
+
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -171,6 +171,7 @@ public class ConjurConfiguration extends AbstractDescribableImpl<ConjurConfigura
 		this.ownerFullName = ownerFullName;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static ListBoxModel fillCredentialIDItemsWithClass(Item item, String credentialsId, Class<? extends StandardCredentials> credentialClass) {
 		StandardListBoxModel result = new StandardListBoxModel();
 		if (item == null && !Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {

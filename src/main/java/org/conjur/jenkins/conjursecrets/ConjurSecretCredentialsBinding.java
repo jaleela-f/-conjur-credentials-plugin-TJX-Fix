@@ -52,7 +52,7 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 
 	@Override
 	public MultiEnvironment bind(Run<?, ?> build, FilePath workSpace, Launcher launcher, TaskListener listener)
-			throws IOException, InterruptedException {
+			throws IOException, InterruptedException{
 		LOGGER.log(Level.FINE, "**** binding **** : " + build);
 		ConjurCredentialStore store = ConjurCredentialStore.getAllStores().get(String.valueOf(build.getParent().hashCode()));
 		if (store != null) {
